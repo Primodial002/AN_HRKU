@@ -19,7 +19,7 @@ FILELION_API = ""
 STREAMWISH_API = ""
 EXCLUDED_EXTENSIONS = ""
 INCOMPLETE_TASK_NOTIFIER = False
-YT_DLP_OPTIONS = ""
+YT_DLP_OPTIONS = '{ "format": "best[height<=480][ext=mp4]/best[ext=mp4]/best", "noplaylist": True, "ignoreerrors": True, "windowsfilenames": True, "no_check_certificate": True }'
 USE_SERVICE_ACCOUNTS = False
 NAME_SUBSTITUTE = ""
 FFMPEG_CMDS = {}
@@ -95,20 +95,20 @@ LEECH_DUMP_CHAT = []
 THUMBNAIL_LAYOUT = ""
 
 # qBittorrent/Aria2c
-TORRENT_TIMEOUT = 0
+TORRENT_TIMEOUT = 300
 BASE_URL = ""
 BASE_URL_PORT = 80
 WEB_PINCODE = False
 
 # Queueing system
-QUEUE_ALL = 0
-QUEUE_DOWNLOAD = 0
-QUEUE_UPLOAD = 0
+QUEUE_ALL = 2
+QUEUE_DOWNLOAD = 1
+QUEUE_UPLOAD = 1
 
 # RSS
-RSS_DELAY = 600
+RSS_DELAY = 1800
 RSS_CHAT = ""
-RSS_SIZE_LIMIT = 0
+RSS_SIZE_LIMIT = 524288000
 
 # Heroku config for get BASE_URL automatically
 HEROKU_APP_NAME = ""

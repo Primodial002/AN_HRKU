@@ -1,3 +1,6 @@
+**Note:** For users deploying on low-resource systems (e.g., small VPS), please refer to the section "[Running on Low-Resource Environments](#running-on-low-resource-environments-eg-500mb-ram-vps)" at the end of this document for specific guidance and optimized configurations.
+
+
 ## 1. Required Fields
 
 | Variable        | Type   | Description                                                                                  |
@@ -135,3 +138,27 @@
 | `INSTADL_API`          | `str`  | URL or endpoint for InstaDL API integration. |
 | `HEROKU_APP_NAME`      | `str`  | Name of the Heroku app for get `BASE_URL` automatically. |
 | `HEROKU_API_KEY`       | `str`  | API key for accessing and controlling Heroku. |
+
+## Running on Low-Resource Environments (e.g., 500MB RAM VPS)
+
+This bot can be demanding on system resources if all features are enabled and used heavily. To run the bot effectively on a low-resource VPS, consider the following:
+
+### 1. Dependencies
+The `requirements.txt` file includes libraries for all supported features. Some of these can be memory-intensive. Review the dependency analysis provided during setup (or in a separate `OPTIMIZATIONS.md` if generated) and consider removing any libraries corresponding to features you do not intend to use. For example, if you don't use Google Drive, qBittorrent, or JDownloader, their respective libraries (`google-api-python-client`, `aioqbt`, etc.) can be removed from `requirements.txt` before building the Docker image or installing locally.
+
+### 2. Configuration Adjustments
+The `config_sample.py` (which you should copy to `config.py` or set via environment variables) has been pre-configured with some conservative defaults suitable for low-resource systems:
+    - **`QUEUE_ALL = 2`**, **`QUEUE_DOWNLOAD = 1`**, **`QUEUE_UPLOAD = 1`**: Limits concurrent tasks. Avoid increasing these significantly.
+    - **`RSS_DELAY = 1800`**: RSS feeds are checked every 30 minutes. Increase if you have many feeds or don't need frequent updates.
+    - **`YT_DLP_OPTIONS = '{ "format": "best[height<=480][ext=mp4]/best[ext=mp4]/best", ... }'`**: Downloads videos in lower resolution (480p) and mp4 format to save CPU and bandwidth. Modify this if you need higher quality, but be mindful of resource impact.
+    - **`TORRENT_TIMEOUT = 300`**: Helps clear unresponsive torrents.
+
+### 3. Resource-Intensive Features:
+    - **FFmpeg (`FFMPEG_CMDS`)**: Complex FFmpeg operations (e.g., transcoding, adding subtitles) are very CPU and memory intensive. The default `FFMPEG_CMDS = {}` disables these. If you add custom FFmpeg commands, use them sparingly and test their resource usage.
+    - **`yt-dlp` (High-Quality Downloads)**: Downloading high-resolution videos (720p, 1080p, 4K) or converting formats with `yt-dlp` can consume significant CPU and RAM. Stick to the optimized `YT_DLP_OPTIONS` or use these features during off-peak hours.
+    - **File Splitting (`LEECH_SPLIT_SIZE`)**: While useful for Telegram's file size limits, splitting very large files can temporarily consume a lot of memory and disk I/O. The default `LEECH_SPLIT_SIZE = 0` (no split) is set to avoid this. If you need splitting, ensure your VPS has enough swap space or monitor memory usage.
+    - **Web Server/API (`fastapi`, `gunicorn`, `uvicorn`)**: If you do not need the web interface or API functionalities of the bot, consider not installing these dependencies to save resources. (This would require customizing `requirements.txt`).
+    - **Simultaneous Large Transfers**: Even with queue limits, initiating multiple transfers of very large files (especially to/from cloud storage like Google Drive or Rclone remotes) can strain a low-resource VPS. Monitor your system if you frequently handle multi-GB files.
+
+### 4. Monitoring
+Regularly monitor your VPS's RAM and CPU usage, especially when the bot is actively downloading or uploading. Tools like `htop` or `docker stats` (if running in Docker) can be helpful. If you consistently hit resource limits, you may need to further restrict bot features, reduce concurrency, or consider a VPS with more resources.
